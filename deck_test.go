@@ -8,11 +8,33 @@ import (
 )
 
 func TestShuffle(t *testing.T) {
-	d := deck.New()
-	e := deck.New()
-	d.Shuffle()
-	if reflect.DeepEqual(d, e) {
-		t.Fatalf("shuffled and non-shuffled deck match")
+	// Unequal tests
+	tt := []struct {
+		name string
+		a    deck.Deck
+		e    deck.Deck
+		fn   func(a, e deck.Deck) // A function which sets up and compares two decks, failing accordingly
+	}{
+		{
+			name: "FullDeck",
+			a:    deck.New(),
+			e:    deck.New(),
+			fn: func(a deck.Deck, e deck.Deck) {
+				a.Shuffle()
+				if len(a) != len(e) {
+					t.Fatalf("expected length of %d, got %d", len(e), len(a))
+				}
+				if reflect.DeepEqual(a, e) {
+					t.Fatal("shuffled deck was equal to un-shuffled deck")
+				}
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.fn(tc.a, tc.e)
+		})
 	}
 }
 

@@ -52,7 +52,10 @@ func (d Deck) Shuffle() {
 	case 0, 1:
 		return
 	case 2:
-		d[0], d[1] = d[1], d[0] // TODO: Randomize this
+		// 50/50 chance to swap the two remaining cards
+		if random.Intn(1) > 0 {
+			d[0], d[1] = d[1], d[0]
+		}
 	default:
 		for i := 0; i < len(d)-2; i++ {
 			j := random.Intn(len(d)-1-i) + i
