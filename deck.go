@@ -1,19 +1,48 @@
 package deck
 
 import (
+	"fmt"
 	"math/rand"
+	"sort"
 	"time"
 )
 
 // Suit represents the suit of a card.
-type Suit rune
+type Suit string
 
-var suits = [...]Suit{'♣', '♦', '♥', '♠'}
+// Suits constants.
+const (
+	Clubs    Suit = "♣"
+	Diamonds Suit = "♦"
+	Hearts   Suit = "♥"
+	Spades   Suit = "♠"
+)
+
+// Enumeration of Suits.
+var suits = [...]Suit{Clubs, Diamonds, Hearts, Spades}
 
 // Rank represents the rank of a card.
 type Rank string
 
-var ranks = [...]Rank{"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
+// Rank constants.
+const (
+	Ace   Rank = "A"
+	Two   Rank = "2"
+	Three Rank = "3"
+	Four  Rank = "4"
+	Five  Rank = "5"
+	Six   Rank = "6"
+	Seven Rank = "7"
+	Eight Rank = "8"
+	Nine  Rank = "9"
+	Ten   Rank = "10"
+	Jack  Rank = "J"
+	Queen Rank = "Q"
+	King  Rank = "K"
+)
+
+// Enumeration of Ranks.
+var ranks = [...]Rank{Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King}
 
 // Card represents a single card from the deck.
 type Card struct {
@@ -65,13 +94,24 @@ func (d Deck) Shuffle() {
 }
 
 // Deal deals a card from the deck, removing it from the deck.
-func (d *Deck) Deal() Card {
-	c := (*d)[0]
-	*d = (*d)[1:]
-	return c
+func (d *Deck) Deal() (Card, error) {
+	deck := *d
+	if len(deck) == 0 {
+		return Card{}, fmt.Errorf("unable to deal card: deck size is zero")
+	}
+	c := (deck)[0]
+	*d = (deck)[1:]
+	return c, nil
 }
 
 // CardsLeft returns the number of cards left in the deck.
 func (d Deck) CardsLeft() int {
 	return len(d)
+}
+
+// Sort sorts the remaining cards in the deck into order.
+func (d Deck) Sort() {
+	sort.SliceStable(d, func(i, j int) bool {
+		return d[i].Rank < d[j].Rank && d[i].Suit < d[j].Suit
+	})
 }

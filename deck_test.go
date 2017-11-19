@@ -8,7 +8,6 @@ import (
 )
 
 func TestShuffle(t *testing.T) {
-	// Unequal tests
 	tt := []struct {
 		name string
 		a    deck.Deck
@@ -25,7 +24,18 @@ func TestShuffle(t *testing.T) {
 					t.Fatalf("expected length of %d, got %d", len(e), len(a))
 				}
 				if reflect.DeepEqual(a, e) {
-					t.Fatal("shuffled deck was equal to un-shuffled deck")
+					t.Fatalf("expected: %v, got %v", e, a)
+				}
+			},
+		},
+		{
+			name: "OneLeft",
+			a:    deck.Deck{deck.Card{Suit: deck.Clubs, Rank: deck.Ace}},
+			e:    deck.Deck{deck.Card{Suit: deck.Clubs, Rank: deck.Ace}},
+			fn: func(a deck.Deck, e deck.Deck) {
+				a.Shuffle()
+				if !reflect.DeepEqual(a, e) {
+					t.Fatalf("expected: %v, got %v", e, a)
 				}
 			},
 		},
@@ -40,7 +50,7 @@ func TestShuffle(t *testing.T) {
 
 func TestDeal(t *testing.T) {
 	d := deck.New()
-	c := d.Deal()
+	c, _ := d.Deal()
 	if len(d) == 52 {
 		t.Fatal("size of deck was not altered after dealing")
 	}
@@ -60,4 +70,8 @@ func TestCardsLeft(t *testing.T) {
 	if left != 51 {
 		t.Fatalf("expected 51 cards left, got %d", left)
 	}
+}
+
+func TestSort(t *testing.T) {
+
 }
