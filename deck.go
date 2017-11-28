@@ -8,37 +8,44 @@ import (
 )
 
 // Suit represents the suit of a card.
-type Suit string
+type Suit struct {
+	Name   string // The name of the Suit (e.g. Clubs)
+	Symbol string // The symbol of the Suit (e.g. ♣)
+}
 
-// Suits constants.
-const (
-	Clubs    Suit = "♣"
-	Diamonds Suit = "♦"
-	Hearts   Suit = "♥"
-	Spades   Suit = "♠"
+// Suits.
+var (
+	Clubs    = Suit{Name: "Clubs", Symbol: "♣"}
+	Diamonds = Suit{Name: "Diamonds", Symbol: "♦"}
+	Hearts   = Suit{Name: "Hearts", Symbol: "♥"}
+	Spades   = Suit{Name: "Spades", Symbol: "♠"}
 )
 
 // Enumeration of Suits.
 var suits = [...]Suit{Clubs, Diamonds, Hearts, Spades}
 
 // Rank represents the rank of a card.
-type Rank string
+type Rank struct {
+	Name   string // The name of the Rank (e.g. Ace)
+	Symbol string // The symbol of the Rank (e.g. A)
+	Value  int    // The value of this rank
+}
 
-// Rank constants.
-const (
-	Ace   Rank = "A"
-	Two   Rank = "2"
-	Three Rank = "3"
-	Four  Rank = "4"
-	Five  Rank = "5"
-	Six   Rank = "6"
-	Seven Rank = "7"
-	Eight Rank = "8"
-	Nine  Rank = "9"
-	Ten   Rank = "10"
-	Jack  Rank = "J"
-	Queen Rank = "Q"
-	King  Rank = "K"
+// Ranks.
+var (
+	Ace   = Rank{Name: "Ace", Symbol: "A", Value: 1} // TODO: Implement Aces High
+	Two   = Rank{Name: "2", Symbol: "2", Value: 2}
+	Three = Rank{Name: "3", Symbol: "3", Value: 3}
+	Four  = Rank{Name: "4", Symbol: "4", Value: 4}
+	Five  = Rank{Name: "5", Symbol: "5", Value: 5}
+	Six   = Rank{Name: "6", Symbol: "6", Value: 6}
+	Seven = Rank{Name: "7", Symbol: "7", Value: 7}
+	Eight = Rank{Name: "8", Symbol: "8", Value: 8}
+	Nine  = Rank{Name: "9", Symbol: "9", Value: 9}
+	Ten   = Rank{Name: "10", Symbol: "10", Value: 10}
+	Jack  = Rank{Name: "Jack", Symbol: "J", Value: 11}
+	Queen = Rank{Name: "Queen", Symbol: "Q", Value: 12}
+	King  = Rank{Name: "King", Symbol: "K", Value: 13}
 )
 
 // Enumeration of Ranks.
@@ -50,8 +57,13 @@ type Card struct {
 	Rank Rank
 }
 
+// Symbols returns the symbols of the Rank and Suit (e.g. A♠).
+func (c Card) Symbols() string {
+	return c.Rank.Symbol + c.Suit.Symbol
+}
+
 func (c Card) String() string {
-	return string(c.Suit) + string(c.Rank)
+	return fmt.Sprintf("%s of %s", c.Rank.Name, c.Suit.Name)
 }
 
 // Deck represents a deck of cards.
@@ -83,12 +95,12 @@ func (d Deck) Shuffle() {
 	case 2:
 		// 50/50 chance to swap the two remaining cards
 		if random.Intn(1) > 0 {
-			d[0], d[1] = d[1], d[0]
+			d.Swap(0, 1)
 		}
 	default:
 		for i := 0; i < len(d)-2; i++ {
 			j := random.Intn(len(d)-1-i) + i
-			d[i], d[j] = d[j], d[i]
+			d.Swap(i, j)
 		}
 	}
 }
@@ -104,14 +116,32 @@ func (d *Deck) Deal() (Card, error) {
 	return c, nil
 }
 
-// CardsLeft returns the number of cards left in the deck.
-func (d Deck) CardsLeft() int {
+// Len returns the current number of cards in the deck.
+// It is also one of the methods used to implement sort.Interface.
+func (d Deck) Len() int {
 	return len(d)
+}
+
+// Swap swaps the position of two cards in the deck.
+// It is also one of the methods used to implement sort.Interface.
+func (d Deck) Swap(i, j int) {
+	d[i], d[j] = d[j], d[i]
+}
+
+// Less determines if the card at index i is lower in value than the card at index j.
+// If two cards are the same rank but different suits, the choice is based on alphabetical order of the suits.
+// Less is also one of the methods used to implement sort.Interface.
+func (d Deck) Less(i, j int) bool {
+	switch {
+	case d[i].Suit.Symbol < d[j].Suit.Symbol:
+		return true
+	case d[i].Suit == d[j].Suit:
+		return d[i].Rank.Value < d[j].Rank.Value
+	}
+	return false
 }
 
 // Sort sorts the remaining cards in the deck into order.
 func (d Deck) Sort() {
-	sort.SliceStable(d, func(i, j int) bool {
-		return d[i].Rank < d[j].Rank && d[i].Suit < d[j].Suit
-	})
+	sort.Sort(d)
 }

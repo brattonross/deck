@@ -59,19 +59,76 @@ func TestDeal(t *testing.T) {
 	}
 }
 
-func TestCardsLeft(t *testing.T) {
+func TestLen(t *testing.T) {
 	d := deck.New()
-	left := d.CardsLeft()
+	left := d.Len()
 	if left != 52 {
 		t.Fatalf("expected 52 cards left, got %d", left)
 	}
 	d.Deal()
-	left = d.CardsLeft()
+	left = d.Len()
 	if left != 51 {
 		t.Fatalf("expected 51 cards left, got %d", left)
 	}
 }
 
-func TestSort(t *testing.T) {
+func TestLess(t *testing.T) {
+	tt := []struct {
+		name     string
+		d        deck.Deck // A deck which should contain two cards to compare
+		expected bool      // The expected result of Less(0, 1)
+	}{
+		{
+			name: "A-Clubs, 2-Clubs",
+			d: deck.Deck{
+				deck.Card{Rank: deck.Ace, Suit: deck.Clubs},
+				deck.Card{Rank: deck.Two, Suit: deck.Clubs},
+			},
+			expected: true,
+		},
+		{
+			name: "A-Clubs, A-Diamonds",
+			d: deck.Deck{
+				deck.Card{Rank: deck.Ace, Suit: deck.Clubs},
+				deck.Card{Rank: deck.Ace, Suit: deck.Diamonds},
+			},
+			expected: true,
+		},
+		{
+			name: "2-Clubs, A-Diamonds",
+			d: deck.Deck{
+				deck.Card{Rank: deck.Two, Suit: deck.Clubs},
+				deck.Card{Rank: deck.Ace, Suit: deck.Diamonds},
+			},
+			expected: true,
+		},
+	}
 
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			a := tc.d.Less(0, 1)
+			if a != tc.expected {
+				t.Fatalf("expected %v, got %v", tc.expected, a)
+			}
+			// Test that the comparison also works in the opposite direction
+			a = tc.d.Less(1, 0)
+			if a == tc.expected {
+				t.Fatalf("expected %v, got %v", !tc.expected, a)
+			}
+		})
+	}
+}
+
+func TestValue(t *testing.T) {
+	d := deck.New()
+	expected := 1
+	for _, c := range d {
+		if c.Rank.Value != expected {
+			t.Fatalf("expected value of %d, got %d", expected, c.Rank.Value)
+		}
+		expected++
+		if expected > 13 {
+			expected = 1
+		}
+	}
 }
